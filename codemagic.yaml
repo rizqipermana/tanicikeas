@@ -1,0 +1,25 @@
+workflows:
+  android-release:
+    name: TaniCikeas Android Build
+    max_build_duration: 30
+    environment:
+      flutter: 3.19.0
+      vars:
+        # ⚠️ Nilai SUPABASE_URL dan SUPABASE_ANON_KEY
+        # diisi di Codemagic → Environment variables
+        # JANGAN isi di sini!
+        SUPABASE_URL: $SUPABASE_URL
+        SUPABASE_ANON_KEY: $SUPABASE_ANON_KEY
+
+    scripts:
+      - name: Install dependencies
+        script: flutter pub get
+
+      - name: Build APK
+        script: |
+          flutter build apk --release \
+            --dart-define=SUPABASE_URL=$SUPABASE_URL \
+            --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
+
+    artifacts:
+      - build/app/outputs/flutter-apk/app-release.apk
