@@ -23,34 +23,48 @@ class SupabaseService {
 
   //   return (response as List).map((e) => TransactionModel.fromJson(e)).toList();
   // }
-Future<List<TransactionModel>> getTransactionsThisMonth() async {
-   print('USER ID = $_userId');
-  if (_userId == null) {
-     print('USER BELUM LOGIN');
-    return [];
-  }
 
-  final now = DateTime.now();
-  final firstDay =
-      DateTime(now.year, now.month, 1).toIso8601String().split('T')[0];
-  final lastDay =
-      DateTime(now.year, now.month + 1, 0).toIso8601String().split('T')[0];
+  
+// Future<List<TransactionModel>> getTransactionsThisMonth() async {
+//    print('USER ID = $_userId');
+//   if (_userId == null) {
+//      print('USER BELUM LOGIN');
+//     return [];
+//   }
 
-   print('FIRST DAY = $firstDay');
-  print('LAST DAY = $lastDay');
+//   final now = DateTime.now();
+//   final firstDay =
+//       DateTime(now.year, now.month, 1).toIso8601String().split('T')[0];
+//   final lastDay =
+//       DateTime(now.year, now.month + 1, 0).toIso8601String().split('T')[0];
 
+//    print('FIRST DAY = $firstDay');
+//   print('LAST DAY = $lastDay');
+
+//   final response = await _client
+//       .from('tbl_transaction')
+//       .select()
+//       .eq('user_id', _userId!)
+//       .gte('transaction_date', firstDay)
+//       .lte('transaction_date', lastDay)
+//       .order('transaction_date', ascending: false);
+  
+//  print('THIS MONTH RESPONSE = $response');
+//   return (response as List)
+//       .map((e) => TransactionModel.fromJson(e))
+//       .toList();
+// }
+
+  Future<List<TransactionModel>> getTransactionsThisMonth() async {
+  if (_userId == null) return [];
+  
   final response = await _client
       .from('tbl_transaction')
       .select()
       .eq('user_id', _userId!)
-      .gte('transaction_date', firstDay)
-      .lte('transaction_date', lastDay)
       .order('transaction_date', ascending: false);
-  
- print('THIS MONTH RESPONSE = $response');
-  return (response as List)
-      .map((e) => TransactionModel.fromJson(e))
-      .toList();
+
+  return (response as List).map((e) => TransactionModel.fromJson(e)).toList();
 }
 
   // Ambil transaksi berdasarkan filter
