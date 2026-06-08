@@ -33,29 +33,55 @@ class _HomeScreenState extends State<HomeScreen> {
 
   double get _saldo => _totalIn - _totalOut;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadData();
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _loadData();
+  // }
 
-  Future<void> _loadData() async {
-    setState(() => _isLoading = true);
-    try {
-      final data = await _service.getTransactionsThisMonth();
-      setState(() {
-        _transactions = data;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() => _isLoading = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal memuat data: $e')),
-        );
-      }
+  // Future<void> _loadData() async {
+  //   setState(() => _isLoading = true);
+  //   try {
+  //     final data = await _service.getTransactionsThisMonth();
+  //     setState(() {
+  //       _transactions = data;
+  //       _isLoading = false;
+  //     });
+  //   } catch (e) {
+  //     setState(() => _isLoading = false);
+  //     if (mounted) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Gagal memuat data: $e')),
+  //       );
+  //     }
+  //   }
+  // }
+
+  @override
+void initState() {
+  super.initState();
+  Future.delayed(const Duration(milliseconds: 500), () {
+    _loadData();
+  });
+}
+
+Future<void> _loadData() async {
+  setState(() => _isLoading = true);
+  try {
+    final data = await _service.getTransactionsThisMonth();
+    setState(() {
+      _transactions = data;
+      _isLoading = false;
+    });
+  } catch (e) {
+    setState(() => _isLoading = false);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal memuat data: $e')),
+      );
     }
   }
+}
 
   String _formatRupiah(double amount) {
     final formatter = NumberFormat.currency(
