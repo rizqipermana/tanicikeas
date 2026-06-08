@@ -24,7 +24,9 @@ class SupabaseService {
   //   return (response as List).map((e) => TransactionModel.fromJson(e)).toList();
   // }
 Future<List<TransactionModel>> getTransactionsThisMonth() async {
+   print('USER ID = $_userId');
   if (_userId == null) {
+     print('USER BELUM LOGIN');
     return [];
   }
 
@@ -33,6 +35,9 @@ Future<List<TransactionModel>> getTransactionsThisMonth() async {
       DateTime(now.year, now.month, 1).toIso8601String().split('T')[0];
   final lastDay =
       DateTime(now.year, now.month + 1, 0).toIso8601String().split('T')[0];
+
+   print('FIRST DAY = $firstDay');
+  print('LAST DAY = $lastDay');
 
   final response = await _client
       .from('tbl_transaction')
