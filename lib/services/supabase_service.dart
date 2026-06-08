@@ -41,7 +41,8 @@ Future<List<TransactionModel>> getTransactionsThisMonth() async {
       .gte('transaction_date', firstDay)
       .lte('transaction_date', lastDay)
       .order('transaction_date', ascending: false);
-
+  
+ print('THIS MONTH RESPONSE = $response');
   return (response as List)
       .map((e) => TransactionModel.fromJson(e))
       .toList();
