@@ -324,6 +324,18 @@ Future<void> _loadData() async {
                 ),
               ),
               const SizedBox(height: 10),
+
+Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 16),
+  child: Text(
+    'DEBUG: jumlah transaksi = ${_transactions.length}',
+    style: const TextStyle(
+      color: Colors.red,
+      fontWeight: FontWeight.bold,
+    ),
+  ),
+),
+              
               if (_isLoading)
                 const Center(child: Padding(
                   padding: EdgeInsets.all(24),
