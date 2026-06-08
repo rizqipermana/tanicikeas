@@ -6,12 +6,12 @@ workflows:
       flutter: stable
       groups:
         - tanicikeas
-      #vars:
+      vars:
         # ⚠️ Nilai SUPABASE_URL dan SUPABASE_ANON_KEY
         # diisi di Codemagic → Environment variables
         # JANGAN isi di sini!
-        #SUPABASE_URL: $SUPABASE_URL
-       # SUPABASE_ANON_KEY: $SUPABASE_ANON_KEY
+        SUPABASE_URL: $SUPABASE_URL
+        SUPABASE_ANON_KEY: $SUPABASE_ANON_KEY
 
     scripts:
       - name: Install dependencies
