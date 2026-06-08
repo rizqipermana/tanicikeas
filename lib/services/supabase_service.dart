@@ -61,7 +61,6 @@ class SupabaseService {
   final response = await _client
       .from('tbl_transaction')
       .select()
-      .eq('user_id', _userId!)
       .order('transaction_date', ascending: false);
 
   return (response as List).map((e) => TransactionModel.fromJson(e)).toList();
