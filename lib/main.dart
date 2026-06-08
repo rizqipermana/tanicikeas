@@ -5,8 +5,8 @@ import 'screens/home_screen.dart';
 
 // Diisi otomatis saat build oleh Codemagic
 // Jangan isi manual di sini kalau mau upload ke GitHub
-const String supabaseUrl = 'https://jyfonqzxjsigucjdlrah.supabase.co';
-const String supabaseAnonKey = 'sb_publishable_EdpsxvNCQjXVxHKuvV7yLA_tGrj5iuX';
+const String supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+const String supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
