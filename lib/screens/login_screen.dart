@@ -31,12 +31,12 @@ class _LoginScreenState extends State<LoginScreen> {
         email: email,
         password: password,
       );
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-        );
-      }
+      // if (mounted) {
+      //   Navigator.pushReplacement(
+      //     context,
+      //     MaterialPageRoute(builder: (_) => const HomeScreen()),
+      //   );
+      // }
     } on AuthException catch (e) {
       _showSnack(e.message == 'Invalid login credentials'
           ? 'Email atau password salah'
