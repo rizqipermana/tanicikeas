@@ -16,11 +16,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
   List<TransactionModel> _transactions = [];
   bool _isLoading = true;
 
-  @override
-  void initState() {
-    super.initState();
+@override
+void initState() {
+  super.initState();
+  Future.delayed(const Duration(milliseconds: 800), () {
     _load();
-  }
+  });
+}
 
   Future<void> _load() async {
     setState(() => _isLoading = true);
