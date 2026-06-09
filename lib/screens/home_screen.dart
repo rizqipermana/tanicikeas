@@ -121,8 +121,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Selamat datang,',
-                      style: TextStyle(color: Color(0xFF90B8EE), fontSize: 13)),
+                    // const Text('Selamat datang,',
+                    //   style: TextStyle(color: Color(0xFF90B8EE), fontSize: 13)),
+                    Row(
+  children: [
+    const Text('Selamat datang, ',
+      style: TextStyle(color: Color(0xFF90B8EE), fontSize: 13)),
+    Text(
+      Supabase.instance.client.auth.currentUser?.userMetadata?['full_name'] ?? 'Petani',
+      style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+    ),
+  ],
+),
                     const SizedBox(height: 2),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
