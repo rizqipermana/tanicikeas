@@ -19,7 +19,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _service = SupabaseService();
   int _currentIndex = 0;
-
   List<TransactionModel> _transactions = [];
   bool _isLoading = true;
 
@@ -33,77 +32,49 @@ class _HomeScreenState extends State<HomeScreen> {
 
   double get _saldo => _totalIn - _totalOut;
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _loadData();
-  // }
-
-  // Future<void> _loadData() async {
-  //   setState(() => _isLoading = true);
-  //   try {
-  //     final data = await _service.getTransactionsThisMonth();
-  //     setState(() {
-  //       _transactions = data;
-  //       _isLoading = false;
-  //     });
-  //   } catch (e) {
-  //     setState(() => _isLoading = false);
-  //     if (mounted) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Gagal memuat data: $e')),
-  //       );
-  //     }
-  //   }
-  // }
-
   @override
-void initState() {
-  super.initState();
-  Future.delayed(const Duration(milliseconds: 500), () {
-    _loadData();
-  });
-}
-
-Future<void> _loadData() async {
-  setState(() => _isLoading = true);
-  try {
-    final data = await _service.getTransactionsThisMonth();
-    setState(() {
-      _transactions = data;
-      _isLoading = false;
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(milliseconds: 500), () {
+      _loadData();
     });
-  } catch (e) {
-    setState(() => _isLoading = false);
-    if (mounted) {
+  }
+
+  Future<void> _loadData() async {
+    if (!mounted) return;
+    setState(() => _isLoading = true);
+    try {
+      final data = await _service.getTransactionsThisMonth();
+      if (!mounted) return;
+      setState(() {
+        _transactions = data;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Gagal memuat data: $e')),
       );
     }
   }
-}
 
   String _formatRupiah(double amount) {
-    final formatter = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp ',
-      decimalDigits: 0,
-    );
-    return formatter.format(amount);
+    return NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(amount);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-  backgroundColor: const Color(0xFFF0F4FA),
-  body: IndexedStack(
-    index: _currentIndex,
-    children: [
-      _buildHome(),
-      HistoryScreen(onRefresh: _loadData),
-      ReportScreen(),
-    ],
-  ),
+      backgroundColor: const Color(0xFFF0F4FA),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: [
+          _buildHome(),
+          HistoryScreen(onRefresh: _loadData),
+          const ReportScreen(),
+        ],
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (i) {
@@ -142,7 +113,7 @@ Future<void> _loadData() async {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
+              // Header biru
               Container(
                 width: double.infinity,
                 color: const Color(0xFF0D3B7A),
@@ -150,22 +121,14 @@ Future<void> _loadData() async {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Selamat datang,',
-                      style: TextStyle(color: Color(0xFF90B8EE), fontSize: 13),
-                    ),
+                    const Text('Selamat datang,',
+                      style: TextStyle(color: Color(0xFF90B8EE), fontSize: 13)),
                     const SizedBox(height: 2),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'TaniCikeas 🌾',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        const Text('TaniCikeas 🌾',
+                          style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w600)),
                         GestureDetector(
                           onTap: () async {
                             final confirm = await showDialog<bool>(
@@ -191,13 +154,11 @@ Future<void> _loadData() async {
                               color: Colors.white.withOpacity(0.15),
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: const Row(
-                              children: [
-                                Icon(Icons.logout, color: Colors.white, size: 14),
-                                SizedBox(width: 5),
-                                Text('Keluar', style: TextStyle(color: Colors.white, fontSize: 12)),
-                              ],
-                            ),
+                            child: const Row(children: [
+                              Icon(Icons.logout, color: Colors.white, size: 14),
+                              SizedBox(width: 5),
+                              Text('Keluar', style: TextStyle(color: Colors.white, fontSize: 12)),
+                            ]),
                           ),
                         ),
                       ],
@@ -215,50 +176,25 @@ Future<void> _loadData() async {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Saldo Saat Ini',
-                            style: TextStyle(color: Color(0xFFB5D4F7), fontSize: 12),
-                          ),
+                          const Text('Saldo Saat Ini',
+                            style: TextStyle(color: Color(0xFFB5D4F7), fontSize: 12)),
                           const SizedBox(height: 4),
                           _isLoading
-                              ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
-                              : Text(
-                                  _formatRupiah(_saldo),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 26,
-                                    fontWeight: FontWeight.w600,
-                                    letterSpacing: -0.5,
-                                  ),
-                                ),
+                            ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                            : Text(_formatRupiah(_saldo),
+                                style: const TextStyle(color: Colors.white, fontSize: 26,
+                                  fontWeight: FontWeight.w600, letterSpacing: -0.5)),
                           const SizedBox(height: 14),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: SummaryCard(
-                                  label: 'Pemasukan',
-                                  value: _formatRupiah(_totalIn),
-                                  valueColor: Colors.white,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: SummaryCard(
-                                  label: 'Pengeluaran',
-                                  value: _formatRupiah(_totalOut),
-                                  valueColor: const Color(0xFFFFB085),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: SummaryCard(
-                                  label: 'Laba',
-                                  value: _formatRupiah(_saldo),
-                                  valueColor: const Color(0xFFA3F0C0),
-                                ),
-                              ),
-                            ],
-                          ),
+                          Row(children: [
+                            Expanded(child: SummaryCard(label: 'Pemasukan',
+                              value: _formatRupiah(_totalIn), valueColor: Colors.white)),
+                            const SizedBox(width: 10),
+                            Expanded(child: SummaryCard(label: 'Pengeluaran',
+                              value: _formatRupiah(_totalOut), valueColor: const Color(0xFFFFB085))),
+                            const SizedBox(width: 10),
+                            Expanded(child: SummaryCard(label: 'Laba',
+                              value: _formatRupiah(_saldo), valueColor: const Color(0xFFA3F0C0))),
+                          ]),
                         ],
                       ),
                     ),
@@ -267,78 +203,56 @@ Future<void> _loadData() async {
                 ),
               ),
 
-              // Tombol Tambah Transaksi
+              // Tombol transaksi
               Padding(
                 padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _ActionButton(
-                        label: '+ Pemasukan',
-                        color: const Color(0xFF1A5FC8),
-                        bgColor: const Color(0xFFE6F1FB),
-                        borderColor: const Color(0xFF378ADD),
-                        onTap: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const AddTransactionScreen(type: 'in'),
-                            ),
-                          );
-                          _loadData();
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _ActionButton(
-                        label: '- Pengeluaran',
-                        color: const Color(0xFFA03A10),
-                        bgColor: const Color(0xFFFDEEE6),
-                        borderColor: const Color(0xFFF4924E),
-                        onTap: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const AddTransactionScreen(type: 'out'),
-                            ),
-                          );
-                          _loadData();
-                        },
-                      ),
-                    ),
-                  ],
-                ),
+                child: Row(children: [
+                  Expanded(child: _ActionButton(
+                    label: '+ Pemasukan',
+                    color: const Color(0xFF1A5FC8),
+                    bgColor: const Color(0xFFE6F1FB),
+                    borderColor: const Color(0xFF378ADD),
+                    onTap: () async {
+                      await Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => const AddTransactionScreen(type: 'in')));
+                      _loadData();
+                    },
+                  )),
+                  const SizedBox(width: 10),
+                  Expanded(child: _ActionButton(
+                    label: '- Pengeluaran',
+                    color: const Color(0xFFA03A10),
+                    bgColor: const Color(0xFFFDEEE6),
+                    borderColor: const Color(0xFFF4924E),
+                    onTap: () async {
+                      await Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => const AddTransactionScreen(type: 'out')));
+                      _loadData();
+                    },
+                  )),
+                ]),
               ),
 
-              // Transaksi Terakhir
+              // List transaksi terakhir
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  'TRANSAKSI TERAKHIR',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey,
-                    letterSpacing: 0.5,
-                  ),
-                ),
+                child: Text('TRANSAKSI TERAKHIR',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500,
+                    color: Colors.grey, letterSpacing: 0.5)),
               ),
               const SizedBox(height: 10),
-              
+
               if (_isLoading)
                 const Center(child: Padding(
                   padding: EdgeInsets.all(24),
                   child: CircularProgressIndicator(),
                 ))
               else if (_transactions.isEmpty)
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(32),
-                    child: Text('Belum ada transaksi bulan ini',
-                      style: TextStyle(color: Colors.grey)),
-                  ),
-                )
+                const Center(child: Padding(
+                  padding: EdgeInsets.all(32),
+                  child: Text('Belum ada transaksi bulan ini',
+                    style: TextStyle(color: Colors.grey)),
+                ))
               else
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -348,28 +262,15 @@ Future<void> _loadData() async {
                     border: Border.all(color: Colors.grey.shade200, width: 0.5),
                   ),
                   child: Column(
-                    // children: _transactions.take(5).map((tx) =>
-                    //   TransactionTile(
-                    //     transaction: tx,
-                    //     onDelete: () async {
-                    //       if (tx.id != null) {
-                    //         await _service.deleteTransaction(tx.id!);
-                    //         _loadData();
-                    //       }
-                    //     },
-                    //   )
-                    // ).toList(),
-                    children: _transactions.take(5).map((tx) =>
-  TransactionTile(
-    transaction: tx,
-    onDelete: () async {
-      if (tx.id != null) {
-        await _service.deleteTransaction(tx.id!);
-        _loadData();
-      }
-    },
-  )
-).toList(),
+                    children: _transactions.take(5).map((tx) => TransactionTile(
+                      transaction: tx,
+                      onDelete: () async {
+                        if (tx.id != null) {
+                          await _service.deleteTransaction(tx.id!);
+                          _loadData();
+                        }
+                      },
+                    )).toList(),
                   ),
                 ),
               const SizedBox(height: 24),
@@ -387,11 +288,8 @@ class _ActionButton extends StatelessWidget {
   final VoidCallback onTap;
 
   const _ActionButton({
-    required this.label,
-    required this.color,
-    required this.bgColor,
-    required this.borderColor,
-    required this.onTap,
+    required this.label, required this.color,
+    required this.bgColor, required this.borderColor, required this.onTap,
   });
 
   @override
@@ -406,14 +304,8 @@ class _ActionButton extends StatelessWidget {
           border: Border.all(color: borderColor, width: 1.5),
         ),
         alignment: Alignment.center,
-        child: Text(
-          label,
-          style: TextStyle(
-            color: color,
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
-          ),
-        ),
+        child: Text(label, style: TextStyle(color: color,
+          fontWeight: FontWeight.w600, fontSize: 14)),
       ),
     );
   }
