@@ -94,15 +94,16 @@ Future<void> _loadData() async {
 
   @override
   Widget build(BuildContext context) {
-    final pages = [
+    return Scaffold(
+  backgroundColor: const Color(0xFFF0F4FA),
+  body: IndexedStack(
+    index: _currentIndex,
+    children: [
       _buildHome(),
       HistoryScreen(onRefresh: _loadData),
       ReportScreen(),
-    ];
-
-    return Scaffold(
-      backgroundColor: const Color(0xFFF0F4FA),
-      body: pages[_currentIndex],
+    ],
+  ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (i) {
