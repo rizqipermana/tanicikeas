@@ -17,7 +17,7 @@ class TransactionTile extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
-    return DateFormat('dd MMM', 'id_ID').format(date);
+    return DateFormat('dd MMM yyyy', 'id_ID').format(date);
   }
 
   bool get _isIn => transaction.transactionType == 'in';
@@ -37,6 +37,7 @@ class TransactionTile extends StatelessWidget {
         return await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             title: const Text('Hapus transaksi?'),
             content: const Text('Data ini akan dihapus permanen.'),
             actions: [
@@ -51,47 +52,83 @@ class TransactionTile extends StatelessWidget {
       },
       onDismissed: (_) => onDelete?.call(),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           border: Border(bottom: BorderSide(color: Colors.grey.shade100, width: 0.5)),
         ),
         child: Row(
           children: [
+            // Icon bulat
             Container(
-              width: 36,
-              height: 36,
+              width: 42,
+              height: 42,
               decoration: BoxDecoration(
                 color: _isIn ? const Color(0xFFE6F1FB) : const Color(0xFFFDEEE6),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 _isIn ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded,
                 color: _isIn ? const Color(0xFF1A5FC8) : const Color(0xFFA03A10),
-                size: 18,
+                size: 20,
               ),
             ),
             const SizedBox(width: 12),
+            // Info transaksi
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(transaction.category,
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-                  const SizedBox(height: 2),
                   Text(
-                    transaction.note != null && transaction.note!.isNotEmpty
-                        ? '${_formatDate(transaction.transactionDate)} · ${transaction.note}'
-                        : _formatDate(transaction.transactionDate),
-                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                    transaction.category,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
                   ),
+                  const SizedBox(height: 3),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: _isIn ? const Color(0xFFE6F1FB) : const Color(0xFFFDEEE6),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          _isIn ? 'Pemasukan' : 'Pengeluaran',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                            color: _isIn ? const Color(0xFF1A5FC8) : const Color(0xFFA03A10),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        _formatDate(transaction.transactionDate),
+                        style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                      ),
+                    ],
+                  ),
+                  if (transaction.note != null && transaction.note!.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 3),
+                      child: Text(
+                        transaction.note!,
+                        style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                 ],
               ),
             ),
+            // Nominal
             Text(
               '${_isIn ? '+' : '-'} ${_formatRupiah(transaction.amount)}',
               style: TextStyle(
                 fontSize: 14,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
                 color: _isIn ? const Color(0xFF1A5FC8) : const Color(0xFFA03A10),
               ),
             ),
