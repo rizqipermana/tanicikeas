@@ -359,13 +359,17 @@ Future<void> _loadData() async {
                     //     },
                     //   )
                     // ).toList(),
-                    children: _transactions.take(5).map((tx) {
-  return ListTile(
-    title: Text(tx.category),
-    subtitle: Text(tx.transactionType),
-    trailing: Text(tx.amount.toString()),
-  );
-}).toList(),
+                    children: _transactions.take(5).map((tx) =>
+  TransactionTile(
+    transaction: tx,
+    onDelete: () async {
+      if (tx.id != null) {
+        await _service.deleteTransaction(tx.id!);
+        _loadData();
+      }
+    },
+  )
+).toList(),
                   ),
                 ),
               const SizedBox(height: 24),
