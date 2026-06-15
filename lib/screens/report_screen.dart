@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:fl_chart/fl_chart.dart';
 import '../services/supabase_service.dart';
 import '../models/transaction.dart';
 
@@ -13,6 +14,8 @@ class ReportScreen extends StatefulWidget {
 class _ReportScreenState extends State<ReportScreen> {
   final _service = SupabaseService();
   String _filter = 'bulan';
+  DateTime? _startDate;
+  DateTime? _endDate;
   List<TransactionModel> _transactions = [];
   bool _isLoading = true;
 
@@ -33,15 +36,119 @@ class _ReportScreenState extends State<ReportScreen> {
   Future<void> _load() async {
     setState(() => _isLoading = true);
     try {
-      final data = await _service.getTransactionsByFilter(_filter);
+      List<TransactionModel> data;
+      if (_filter == 'custom' && _startDate != null && _endDate != null) {
+        data = await _service.getTransactionsByDateRange(_startDate!, _endDate!);
+      } else {
+        data = await _service.getTransactionsByFilter(_filter);
+      }
       setState(() { _transactions = data; _isLoading = false; });
     } catch (e) {
       setState(() => _isLoading = false);
     }
   }
 
+  Future<void> _pickDateRange() async {
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+      initialDateRange: _startDate != null && _endDate != null
+          ? DateTimeRange(start: _startDate!, end: _endDate!)
+          : null,
+    );
+    if (picked != null) {
+      setState(() {
+        _startDate = picked.start;
+        _endDate = picked.end;
+        _filter = 'custom';
+      });
+      _load();
+    }
+  }
+
   String _formatRupiah(double amount) {
     return NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(amount);
+  }
+
+  Widget _buildChart() {
+    // Group by day
+    Map<String, Map<String, double>> dailyData = {};
+    for (var t in _transactions) {
+      String dateStr = DateFormat('dd/MM').format(t.transactionDate);
+      if (!dailyData.containsKey(dateStr)) {
+        dailyData[dateStr] = {'in': 0, 'out': 0};
+      }
+      dailyData[dateStr]![t.transactionType] = (dailyData[dateStr]![t.transactionType] ?? 0) + t.amount;
+    }
+
+    List<String> dates = dailyData.keys.toList().reversed.toList(); // Oldest to newest
+    if (dates.length > 10) {
+      dates = dates.sublist(dates.length - 10); // Show max 10 days for readability
+    }
+
+    List<BarChartGroupData> barGroups = [];
+    double maxY = 0;
+
+    for (int i = 0; i < dates.length; i++) {
+      String date = dates[i];
+      double inAmount = dailyData[date]!['in'] ?? 0;
+      double outAmount = dailyData[date]!['out'] ?? 0;
+      
+      if (inAmount > maxY) maxY = inAmount;
+      if (outAmount > maxY) maxY = outAmount;
+
+      barGroups.add(
+        BarChartGroupData(
+          x: i,
+          barRods: [
+            BarChartRodData(
+              toY: inAmount,
+              color: const Color(0xFF1A5FC8),
+              width: 10,
+              borderRadius: const BorderRadius.only(topLeft: Radius.circular(4), topRight: Radius.circular(4)),
+            ),
+            BarChartRodData(
+              toY: outAmount,
+              color: const Color(0xFFD9531C),
+              width: 10,
+              borderRadius: const BorderRadius.only(topLeft: Radius.circular(4), topRight: Radius.circular(4)),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return BarChart(
+      BarChartData(
+        alignment: BarChartAlignment.spaceAround,
+        maxY: maxY == 0 ? 100 : maxY * 1.2,
+        barTouchData: BarTouchData(enabled: true),
+        titlesData: FlTitlesData(
+          show: true,
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              getTitlesWidget: (value, meta) {
+                if (value.toInt() >= 0 && value.toInt() < dates.length) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(dates[value.toInt()], style: const TextStyle(fontSize: 10)),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+          leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        ),
+        gridData: const FlGridData(show: false),
+        borderData: FlBorderData(show: false),
+        barGroups: barGroups,
+      ),
+    );
   }
 
   @override
@@ -69,8 +176,38 @@ class _ReportScreenState extends State<ReportScreen> {
                 const SizedBox(width: 8),
                 _FilterBtn(label: 'Bulan Ini', value: 'bulan', selected: _filter,
                   onTap: () { setState(() => _filter = 'bulan'); _load(); }),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: _pickDateRange,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: _filter == 'custom' ? const Color(0xFFE6F1FB) : const Color(0xFFF5F5F5),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: _filter == 'custom' ? const Color(0xFF378ADD) : Colors.grey.shade300,
+                          width: 0.5,
+                        ),
+                      ),
+                      alignment: Alignment.center,
+                      child: Icon(Icons.date_range, 
+                        size: 16, 
+                        color: _filter == 'custom' ? const Color(0xFF0C447C) : Colors.grey
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
+            if (_filter == 'custom' && _startDate != null && _endDate != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(
+                  '${DateFormat('dd MMM yyyy').format(_startDate!)} - ${DateFormat('dd MMM yyyy').format(_endDate!)}',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade700, fontWeight: FontWeight.w600),
+                ),
+              ),
             const SizedBox(height: 16),
 
             // Laporan card
@@ -104,9 +241,9 @@ class _ReportScreenState extends State<ReportScreen> {
                         ),
                         const Divider(height: 0.5, thickness: 0.5),
                         Container(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF0F4FA),
-                            borderRadius: const BorderRadius.only(
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFF0F4FA),
+                            borderRadius: BorderRadius.only(
                               bottomLeft: Radius.circular(14),
                               bottomRight: Radius.circular(14),
                             ),
@@ -123,6 +260,26 @@ class _ReportScreenState extends State<ReportScreen> {
                       ],
                     ),
             ),
+            
+            const SizedBox(height: 24),
+            
+            // Chart Section
+            if (!_isLoading && _transactions.isNotEmpty) ...[
+              const Text('Grafik Pemasukan & Pengeluaran',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 16),
+              Container(
+                height: 250,
+                padding: const EdgeInsets.only(top: 24, right: 16, bottom: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.grey.shade200, width: 0.5),
+                ),
+                child: _buildChart(),
+              ),
+              const SizedBox(height: 24),
+            ],
           ],
         ),
       ),

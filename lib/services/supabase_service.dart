@@ -44,6 +44,20 @@ class SupabaseService {
     return (response as List).map((e) => TransactionModel.fromJson(e)).toList();
   }
 
+  Future<List<TransactionModel>> getTransactionsByDateRange(DateTime start, DateTime end) async {
+    if (_userId == null) return [];
+
+    final response = await _client
+        .from('tbl_transaction')
+        .select()
+        .eq('user_id', _userId!)
+        .gte('transaction_date', start.toIso8601String().split('T')[0])
+        .lte('transaction_date', end.toIso8601String().split('T')[0])
+        .order('transaction_date', ascending: true);
+
+    return (response as List).map((e) => TransactionModel.fromJson(e)).toList();
+  }
+
   Future<void> addTransaction(TransactionModel tx) async {
     final data = tx.toJson();
     data['user_id'] = _userId;

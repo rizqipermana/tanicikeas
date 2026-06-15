@@ -20,8 +20,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   String? _selectedCategory;
   bool _isLoading = false;
 
-  final List<String> _catsIn = ['Penjualan Singkong', 'Penjualan Lain'];
-  final List<String> _catsOut = ['Bibit', 'Pupuk', 'Pestisida', 'Upah', 'Transportasi', 'Lainnya'];
+  final List<String> _catsIn = ['Penjualan Singkong', 'Penjualan Lain','Hibah/Donasi', 'Penjualan Kripik Ubi Kayu', 'Penjualan Kripik Dendeng Daun'];
+  final List<String> _catsOut = ['Bibit', 'Pupuk', 'Upah', 'Transportasi', 'Lainnya','Peralatan Producksi','Bahan Produksi'];
 
   List<String> get _categories => widget.type == 'in' ? _catsIn : _catsOut;
 
